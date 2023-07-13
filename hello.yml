@@ -1,0 +1,6 @@
+- hosts: localhost
+  tasks:
+    - name: "Hello World"
+      debug:
+        msg: This is the Hello World Debug message!
+
