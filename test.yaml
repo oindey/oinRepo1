@@ -1,0 +1,4 @@
+- hosts: localhost
+  tasks:
+    - name: "show network interfaces"
+      command: ifconfig
