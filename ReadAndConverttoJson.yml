@@ -1,14 +1,11 @@
 ---
-- name: Read incident data from a file and REST-API call a template
+- name: Read incident data from a file and convert it into the Json Format
   hosts: localhost
   gather_facts: no
 
   vars:
     file_path: "{{ file_path }}"
-    alert_name: "{{ alert_name }}"
-    CI_Name: "{{ CI_Name }}"
-    OS: "{{ OS }}"
-    Restricted: "{{ Restricted }}"
+    
 
   tasks:
 
