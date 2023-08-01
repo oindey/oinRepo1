@@ -1,0 +1,33 @@
+---
+- name: Read incident data from a file and REST-API call a template
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    file_path: "{{ file_path }}"
+    alert_name: "{{ alert_name }}"
+    CI_Name: "{{ CI_Name }}"
+    OS: "{{ OS }}"
+    Restricted: "{{ Restricted }}"
+
+  tasks:
+
+    - block:
+
+      - name: Read data from file
+        slurp:
+          #src: /home/ubuntu/.ansible/cmdb_data
+          src: "{{ file_path }}"
+        register: file_content
+
+      - name: Convert file content to JSON
+        set_fact:
+          json_data: "{{ file_content.content | b64decode | from_json }}"
+
+      - name: Display the JSON Data
+        debug:
+          var: json_data
+
+      - name: Check the type of JSON Data
+        debug:
+          msg: "the data type of json_data is {{ json_data | type_debug }}"
