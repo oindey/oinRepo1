@@ -10,4 +10,4 @@
   
     - name: Display Python file content
       debug:
-        var: python_file_content.content | b64decode
+        var: python_file_content
