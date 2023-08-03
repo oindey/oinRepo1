@@ -1,9 +1,18 @@
 ---
 - name: extra variable demo
-  hosts: all
+  hosts: localhost
   vars:
     fruit: "banana"
   task:
     - name: print message
       ansible.builtin.debug:
         msg: "fruit is {{ fruit }}"
+
+    - name: read python file
+      slurp:
+        src: https://github.com/oindey/oinRepo/ci_name.py
+      register: python_file_content
+
+    - name: Display Python file content
+      debug:
+        var: python_file_content.content | b64decode
