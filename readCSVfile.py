@@ -4,8 +4,8 @@ def read_csv_file(file_path):
     data = []
     try:
         with open(file_path, 'r', newline='') as csvfile:
-            csvReader = csv.reader(csvfile)
-            for row in csvReader:
+            csvreader = csv.reader(csvfile)
+            for row in csvreader:
                 data.append(row)
         return data
     except FileNotFoundError:
@@ -15,6 +15,5 @@ def read_csv_file(file_path):
         print(f"An error occurred while reading the file: {e}")
         return None
 
-
-print(read_csv_file(r"samplecsv.csv"))
+print(read_csv_file(r"C:\Users\oindey\Desktop\Ansible\dataDump\samplecsv.csv"))
 
