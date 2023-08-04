@@ -1,9 +1,9 @@
 ---
-- name: Read csv file
-  gather_facts: no
+- name: Read CSV File
   hosts: localhost
+  gather_facts: false
 
-  ars:
+  vars:
     csv_file_path: samplecsv.csv
 
   tasks:
