@@ -15,5 +15,5 @@ def read_csv_file(file_path):
         print(f"An error occurred while reading the file: {e}")
         return None
 
-print(read_csv_file(r"C:\Users\oindey\Desktop\Ansible\dataDump\samplecsv.csv"))
+print(read_csv_file(r"samplecsv.csv"))
 
