@@ -1,15 +1,16 @@
 ---
-- name: Read sample csv file
+- name: Read csv file
   gather_facts: no
   hosts: localhost
 
+  ars:
+    csv_file_path: samplecsv.csv
+
   tasks:
-    - name: Reading csv information
-      community.general.read_csv:
-        path: /home/ubuntu/samplecsv.csv
-      register: usecase
-      
-    - name: Print usecase name and value 
+    - name: Read CSV file
+      set_fact:
+        csv_data: "{{ lookup('csvfile', csv_file_path, delimiter=',') }}"
+
+    - name: Display CSV data
       debug:
-        #  msg: "{{ usecase }}"
-        msg: "{{ usecase.list.0.name }}"
+        var: csv_data
