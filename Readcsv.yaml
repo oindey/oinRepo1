@@ -5,9 +5,9 @@
 
   tasks:
     - name: Reading csv information
-      #community.general.read_csv:
-      read_csv:
-        path: /home/ubuntu/samplecsv.csv
+      community.general.read_csv:
+      #read_csv:
+        path: samplecsv.csv
       register: usecase
 
     - name: Print usecase name and value
