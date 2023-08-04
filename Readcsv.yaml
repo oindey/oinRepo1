@@ -1,0 +1,15 @@
+---
+- name: Read sample csv file
+  gather_facts: no
+  hosts: localhost
+
+  tasks:
+    - name: Reading csv information
+      community.general.read_csv:
+        path: /home/ubuntu/samplecsv.csv
+      register: usecase
+      
+    - name: Print usecase name and value 
+      debug:
+        #  msg: "{{ usecase }}"
+        msg: "{{ usecase.list.0.name }}"
