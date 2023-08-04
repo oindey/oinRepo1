@@ -1,0 +1,16 @@
+---
+- name: Read CSV File
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    csv_file_path: samplecsv.csv
+
+  tasks:
+    - name: Read CSV file
+      set_fact:
+        csv_data: "{{ lookup('csvfile', csv_file_path, delimiter=',') }}"
+
+    - name: Display CSV data
+      debug:
+        var: csv_data
