@@ -1,0 +1,140 @@
+---
+- name: Fetch Incident and Update Incident fields data from ServiceNow
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    servicenow_instance: "https://dev123007.service-now.com"
+    servicenow_user: "admin"
+    servicenow_password: "U7VFd-m+orD8"
+    incident_number: "INC0010004"
+    AutomationUser_sysId: "800b174138d089c868d09de320f9833b" #andrew.och
+    log_file_path: "/home/ubuntu/ansible.log"
+
+  tasks:
+
+    - block:
+        - name: Base64 encode credentials
+          set_fact:
+            encoded_credentials: "{{ (servicenow_user ~ ':' ~ servicenow_password) | b64encode }}"
+          no_log: true
+
+        - name: Fetch all Incidents
+          uri:
+            url: "{{ servicenow_instance }}/api/now/table/incident"
+            method: GET
+            headers:
+              Accept: "application/json"
+              Authorization: "Basic {{ encoded_credentials | string }}"
+            return_content: yes
+            force_basic_auth: yes
+          register: incident_data
+
+        
+
+          
+        - name: Create Global Variable to store fetch API result
+          set_fact:
+            global_incident_data: "{{ incident_data.json }}"
+
+        - name: Loop through the incidents and find matching INC
+          set_fact:
+            matching_inc: "{{ item }}"
+          loop: "{{ global_incident_data.result }}"
+          when:
+            - item['number'] == "{{ incident_number }}"
+              
+        - name: Check if matching incident is found
+          fail:
+            msg: "No matching incidents found."
+          when: matching_inc is not defined
+
+        - name: Print matching incident
+          debug:
+            var: matching_inc
+
+        
+
+
+        - name: Extract the incident_state,incident sys_id and assigned_to  from matching inc
+          set_fact:
+            inc_sys_id: "{{ matching_inc['sys_id'] }}"
+            incident_state: "{{ matching_inc['incident_state']}}"
+            assigned_to: "{{ matching_inc['assigned_to']}}"
+          when: matching_inc is defined and matching_inc | length > 0
+
+        - name: fetch user sys_id to get the exact user name
+          set_fact:
+            user_sys_id: "{{ assigned_to['value'] }}"
+    
+        - name: Fetch user details from Service now using user_sys_id
+          uri:
+            url: "{{ servicenow_instance }}/api/now/table/sys_user/{{ user_sys_id }}"
+            method: GET
+            headers:
+              Accept: "application/json"
+              Authorization: "Basic {{ encoded_credentials | string }}"
+          register: result_user
+
+        - name: Extract user_name from API response
+          set_fact:
+            user_name: "{{ result_user.json.result.name }}"
+
+        - name: Print the Incident state and Assigned to fields
+          debug:
+            msg: " sys id: {{ inc_sys_id }} and Incident state: {{ incident_state }} and Assigned to: {{ user_name }}"
+        
+        
+
+        - name: Update assigned_to and incident_state fields in ServiceNow Incident
+          uri:
+            url: "{{ servicenow_instance }}/api/now/table/incident/{{ inc_sys_id }}"
+            method: PATCH
+            body_format: json
+            headers:
+              Content-Type: "application/json"
+              Authorization: "Basic {{ encoded_credentials | string }}"
+            body:
+              "incident_state" : "3"
+              "assigned_to" : "{{ AutomationUser_sysId }}"
+          register: result
+
+       
+      
+            ####### Optional code to display a nice output #####
+
+        - name: fetch updated user sys_id to get the exact user name
+          set_fact:
+            updated_user_sys_id: "{{ result.json.result.assigned_to.value }}"
+
+        - name: Fetch updated user details from Service now using updated_user_sys_id
+          uri:
+            url: "{{ servicenow_instance }}/api/now/table/sys_user/{{ updated_user_sys_id }}"
+            method: GET
+            headers:
+              Accept: "application/json"
+              Authorization: "Basic {{ encoded_credentials | string }}"
+          register: updated_result_user
+        
+        - name: Extract updated user_name from API response
+          set_fact:
+            updated_user_name: "{{ updated_result_user.json.result.name }}"
+    
+
+        - name: Print the updated API responses
+          debug:
+            msg: "Updated incident state: {{ result.json.result.incident_state }} and updated_assigned_to: {{ updated_user_name }}"
+       
+  
+
+        - name: log success message
+          debug:
+            msg: "Log : SUCCESSFUL"
+
+     
+      rescue: 
+        - name: Log Output For Failure
+          debug:
+            msg: "Log : FAILED : Task {{ ansible_failed_task.name }} Failed and the ERROR: {{ ansible_failed_result }}"
+          failed_when: True
+
