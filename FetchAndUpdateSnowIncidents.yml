@@ -29,19 +29,6 @@
             return_content: yes
             force_basic_auth: yes
           register: incident_data
-
-        #- name: Store fetch all incidents success output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "SUCCESS1: Successfully fetch ALL the matching Incidents"
-          #when: incident_data is success
-
-        #- name: Store fetch all incidents Failure output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "FAILURE1: Failed to fetch the matching Incident"
-          #when: incident_data is failed
-
           
         - name: Create Global Variable to store fetch API result
           set_fact:
@@ -54,27 +41,14 @@
           when:
             - item['number'] == "{{ incident_number }}"
               
-        #- name: Check if matching incident is found
-        #  fail:
-        #    msg: "No matching incidents found."
-        #  when: matching_inc is not defined
+        - name: Check if matching incident is found
+          fail:
+            msg: "No matching incidents found."
+          when: matching_inc is not defined
 
-        #- name: Print matching incident
-        #  debug:
-         #   var: matching_inc
-
-       # - name: Store matching incident success output in the log file
-       #   lineinfile:
-        #    path: "{{ log_file_path }}"
-         #   line: "SUCCESS2: successfully Fetch the matching Incidents"
-         # when: matching_inc is success
-  
-        #- name: Store matching incident Failure output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "FAILURE2: Failed to fetch the matching Incident."
-          #when: matching_inc is failed
-
+        - name: Print matching incident
+          debug:
+            var: matching_inc
 
         - name: Extract the incident_state,incident sys_id and assigned_to  from matching inc
           set_fact:
@@ -104,17 +78,6 @@
           debug:
             msg: " sys id: {{ inc_sys_id }} and Incident state: {{ incident_state }} and Assigned to: {{ user_name }}"
         
-        #- name: Store fetch incident_state, assigned_to field success output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "SUCCESS3: successfully fetch incident_state, assigned_to fields"
-
-        #- name: Store fetch incident_state, assigned_to field Failure output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "FAILURE3: Filed to fetch the incident_state, assigned_to field"
-          #when: result_user is failed
-
         - name: Update assigned_to and incident_state fields in ServiceNow Incident
           uri:
             url: "{{ servicenow_instance }}/api/now/table/incident/{{ inc_sys_id }}"
@@ -127,17 +90,6 @@
               "incident_state" : "3"
               "assigned_to" : "{{ AutomationUser_sysId }}"
           register: result
-
-        #- name: Store updated incident_state, assigned_to fields success output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "SUCCESS4: Successfully Update incident_state, assigned_to fields in incident {{ incident_number }}"
-
-        #- name: Store fetch incident_state, assigned_to field Failure output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "FAILURE4: Filed to fetch the incident_state, assigned_to field"
-          #when: result is failed
       
             ####### Optional code to display a nice output #####
 
@@ -163,22 +115,9 @@
           debug:
             msg: "Updated incident state: {{ result.json.result.incident_state }} and updated_assigned_to: {{ updated_user_name }}"
         
-        #- name: Store final success output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "SUCCESS5: Successfully updated assigned to: {{ updated_user_name }} and incident state: {{ result.json.result.incident_state }} fields in the log file for incident number: {{ incident_number }}"
-
-        #- name: Store final failure output in the log file
-         # lineinfile:
-          #  path: "{{ log_file_path }}"
-           # line: "FAILURE5: Filed to update assigned to: {{ updated_user_name }} and incident state: {{ result.json.result.incident_state }} fields in the log file for incident number: {{ incident_number }}"
-          #when: updated_result_user is failed
-  
-
         - name: log success message
           debug:
             msg: "Log : SUCCESSFUL"
-
      
       rescue: 
         - name: Log Output For Failure
